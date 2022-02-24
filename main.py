@@ -20,8 +20,8 @@ with open('db.txt', 'w') as f:
     for i in range(1, 501):
         r = requests.get(
             f"https://api.themoviedb.org/3/movie/popular?api_key={API_KEY}&language=en-US&page={i}")
-        json_data = r.json()
-        for result in json_data['results']:
+        credit_details = r.json()
+        for result in credit_details['results']:
             j += 1
             progress(j, 10000)
             if 'id' in result and 'release_date' in result and 'title' in result:
@@ -33,14 +33,16 @@ with open('db.txt', 'w') as f:
                     f"https://api.themoviedb.org/3/movie/{movie_id}/credits?api_key={API_KEY}")
                 t = requests.get(
                     f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={API_KEY}")
-                runtime = t.json()['runtime']
-                json_data = r.json()
+                movie_details = t.json()
+                credit_details = r.json()
+                runtime = movie_details['runtime']
+                poster = movie_details['poster_path']
 
-                if 'cast' in json_data:
-                    cast = [cast['name'] for cast in json_data['cast']][0:2]
-                    director = [crew['name'] for crew in json_data['crew']
+                if 'cast' in credit_details:
+                    cast = [cast['name'] for cast in credit_details['cast']][0:2]
+                    director = [crew['name'] for crew in credit_details['crew']
                                 if 'director' == crew['job'].lower()]
                     a = {date[0:4]}
-                    if len(director) != 0 and len(cast) > 1 and movie_id and date and title and runtime:
+                    if len(director) != 0 and len(cast) > 1 and movie_id and date and title and runtime and poster:
                         f.write(
-                            f"{title}*{date[0:4]}*{runtime}*{cast[0]}*{cast[1]}*{director[0]}\n")
+                            f"{title}*{date[0:4]}*{runtime}*{cast[0]}*{cast[1]}*{director[0]}*https://image.tmdb.org/t/p/w500{poster}\n")
